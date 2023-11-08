@@ -6,14 +6,12 @@ print()
 def input_info(mensage, name, _string='', max_length=30):
     ''' Prompts the user for text input with a maximum length and returns the input if it's valid. '''
     _string = input(mensage)
-    if name == 'comment' or name == 'constraint':
+    if name == 'comment' or name == 'constraint' or name == 'constraint description':
         max_length = 1000
-    if name == 'table':
-        max_length = 25
     while True:
         if len(_string) <= max_length:
             return _string
-        print(f"Sorry, the {name} must have a maximum of {max_length} characters.\n")
+        print(f"Sorry, the {name} must have a maximum of {max_length} characters. It has {len(_string)} characters.\n")
         _string = input(f"Please enter a {name} (up to {max_length} characters): ").lower()
 
 
@@ -34,7 +32,7 @@ main_table_sequence = f'sq_{main_table_name[3:].replace("_", "")}_coseq' + ''.jo
 while True:
     if len(main_table_sequence) <= 30:
         break
-    print(f"Sorry, the sequence ({main_table_sequence}) must have a maximum of 30 characters. It has {len(main_table_sequence)}.\n")
+    print(f"Sorry, the sequence ({main_table_sequence}) must have a maximum of 30 characters. It has {len(main_table_sequence)} characters.\n")
     main_table_sequence = input_info("Please enter a sequence (up to 30 characters): ")
 
 # Getting information from table columns 
@@ -101,7 +99,7 @@ primary_key = 'pk_' + main_table_name[3:].replace("_", "")
 while True:
     if len(primary_key) <= 30:
         break
-    print(f"Sorry, the sequence ({primary_key}) must have a maximum of 30 characters. It has {len(primary_key)}.\n")
+    print(f"Sorry, the sequence ({primary_key}) must have a maximum of 30 characters. It has {len(primary_key)} characters.\n")
     primary_key = input_info("Please enter a primary key (up to 30 characters): ")
 
 # Add the Constraint Primary Key to SQL Script
@@ -148,7 +146,7 @@ for index, column in enumerate(columns):
     if index == len(constraints) - 1:
         sql_script += f"COMMENT ON COLUMN {project_schema}.{main_table_name}.{column['name']} IS '{column['comment']}';"
     else:
-        sql_script += f"COMMENT ON COLUMN {project_schema}.{main_table_name}.{column['name']} IS '{column['comment']}';\n"
+        sql_script += f"\nCOMMENT ON COLUMN {project_schema}.{main_table_name}.{column['name']} IS '{column['comment']}';"
 
 sql_script += f'''
 COMMENT ON COLUMN {project_schema}.{main_table_name}.sg_projeto_modificador         IS 'Sigla do projeto que iniciou o processo modificador do dado.';
@@ -160,7 +158,7 @@ COMMENT ON COLUMN {project_schema}.{main_table_name}.dh_alteracao               
 COMMENT ON COLUMN {project_schema}.{main_table_name}.tp_operacao                    IS 'Tipo de operacao realizada no registro. Por exemplo: CREATE, READ, UPDATE, DELETE.';
 COMMENT ON COLUMN {project_schema}.{main_table_name}.nu_versao                      IS 'Numero da versao do registro.';
 COMMENT ON COLUMN {project_schema}.{main_table_name}.co_uuid                        IS 'Identificador unico universal (do ingles universally unique identifier - UUID). Na tabela cada registro tem seu UUID com identificacao unica.';
-COMMENT ON COLUMN {project_schema}.{main_table_name}.co_uuid_1                      IS 'UUID do usuario que realizou a alteracao no registo.'';
+COMMENT ON COLUMN {project_schema}.{main_table_name}.co_uuid_1                      IS 'UUID do usuario que realizou a alteracao no registo.';
 \n\n\n
 '''
 
@@ -177,7 +175,7 @@ history_table_sequence = f'sq_{history_table_name[3:].replace("_", "")}_coseq' +
 while True:
     if len(main_table_sequence) <= 30:
         break
-    print(f"Sorry, the history sequence ({history_table_sequence}) must have a maximum of 30 characters. It has {len(history_table_sequence)}.\n")
+    print(f"Sorry, the history sequence ({history_table_sequence}) must have a maximum of 30 characters. It has {len(history_table_sequence)} characters.\n")
     history_table_sequence = input_info("Please enter a sequence (up to 30 characters): ")
 
 # Create de second part of the SQL Script
@@ -225,7 +223,7 @@ history_primary_key = 'pk_' + history_table_name[3:].replace("_", "")
 while True:
     if len(history_primary_key) <= 30:
         break
-    print(f"Sorry, the sequence ({history_primary_key}) must have a maximum of 30 characters. It has {len(history_primary_key)}.\n")
+    print(f"Sorry, the sequence ({history_primary_key}) must have a maximum of 30 characters. It has {len(history_primary_key)} characters.\n")
     history_primary_key = input_info("Please enter a history primary key (up to 30 characters): ")
 
 # Add the Constraint Primary Key to SQL Script
@@ -258,7 +256,7 @@ COMMENT ON COLUMN {project_schema}.{history_table_name}.dh_alteracao            
 COMMENT ON COLUMN {project_schema}.{history_table_name}.tp_operacao                    IS 'Tipo de operacao realizada no registro. Por exemplo: CREATE, READ, UPDATE, DELETE.';
 COMMENT ON COLUMN {project_schema}.{history_table_name}.nu_versao                      IS 'Numero da versao do registro.';
 COMMENT ON COLUMN {project_schema}.{history_table_name}.co_uuid                        IS 'Identificador unico universal (do ingles universally unique identifier - UUID). Na tabela cada registro tem seu UUID com identificacao unica.';
-COMMENT ON COLUMN {project_schema}.{history_table_name}.co_uuid_1                      IS 'UUID do usuario que realizou a alteracao no registo.'';
+COMMENT ON COLUMN {project_schema}.{history_table_name}.co_uuid_1                      IS 'UUID do usuario que realizou a alteracao no registo.';
 COMMENT ON COLUMN {project_schema}.{history_table_name}.dh_inicio_hist                 IS 'Data que o registro foi incluido na tabela de historico';
 COMMENT ON COLUMN {project_schema}.{history_table_name}.dh_fim_hist                    IS 'Data que o registro foi inativado na tabela de historico, porque um novo registro foi incluido na Tabela. Indica que uma nova alteracao foi realizada na tabela origem.';
 '''
