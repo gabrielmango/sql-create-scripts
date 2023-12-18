@@ -3,53 +3,44 @@ print('SQL script creation of table in database:')
 print('-' * 50)
 print()
 
-def input_info(mensage, name, _string='', max_length=30):
-    ''' Prompts the user for text input with a maximum length and returns the input if it's valid. '''
-    _string = input(mensage)
-    if name == 'comment' or name == 'constraint' or name == 'constraint description':
-        max_length = 1000
+def input_info(mgs, max_length=30):
+    text = input(mgs)
+    valid_name(text, max_length)
+    return text
+
+
+def valid_name(text, max_length=30):
     while True:
-        if len(_string) <= max_length:
-            return _string
-        print(f"Sorry, the {name} must have a maximum of {max_length} characters. It has {len(_string)} characters.\n")
-        _string = input(f"Please enter a {name} (up to {max_length} characters): ").lower()
+        if len(text) <= max_length:
+            break
+        print(f"Sorry, the sequence ({text}) must have a maximum of 30 characters. It has {len(text)} characters.\n")
+        text = input_info("Please enter a sequence (up to 30 characters): ")
 
 
-# Getting the project schema
-project_schema = input_info('Enter the project schema name: ', 'schema')
+project_schema = input_info('Enter the project schema name: ')
+main_table_name = input_info('Enter the table name: ')
+main_table_comment = input_info('Enter the table comment: ', 255)
 
-# Getting the table comment and check table name length
-main_table_name = input_info('Enter the table name: ', 'table')
-
-# Getting the table name and check table name length
-main_table_comment = input_info('Enter the table comment: ', 'comment')
-
-# Getting the sequence
 abbreviation = [letter[0] for letter in main_table_name[3:].split('_')]
 main_table_sequence = f'sq_{main_table_name[3:].replace("_", "")}_coseq' + ''.join(abbreviation)
+valid_name(main_table_sequence)
 
-# Checking the lenght of sequence
-while True:
-    if len(main_table_sequence) <= 30:
-        break
-    print(f"Sorry, the sequence ({main_table_sequence}) must have a maximum of 30 characters. It has {len(main_table_sequence)} characters.\n")
-    main_table_sequence = input_info("Please enter a sequence (up to 30 characters): ")
 
-# Getting information from table columns 
+# Getting information from table columns
 columns = []
 while True:
     columns.append({
         # Getting the column name
-        'name': input_info('Enter the column name: ', 'column'),
+        'name': input_info('Enter the column name: '),
 
         # Getting the column type
-        'type': input_info('Enter the column type: ', 'column'),
+        'type': input_info('Enter the column type: '),
 
         # Getting the column mandatory
-        'mandatory': input_info('Is the column NULL or NOT NULL? ', 'column'),
+        'mandatory': input_info('Is the column NULL or NOT NULL? '),
 
         # Gettinh the column comment
-        'comment': input_info('Enter the column comment: ', 'comment')
+        'comment': input_info('Enter the column comment: ', 255)
     })
 
     # Check add another column info
@@ -61,10 +52,10 @@ while True:
 # Create de first part of the SQL Script
 sql_script = f'''
 ---------------------------------------
--- Tabela {main_table_name.upper()}
+-- TABELA {main_table_name.upper()}
 ---------------------------------------
----- DROP TABLE    IF EXISTS {project_schema}.{main_table_name} CASCADE;
----- DROP SEQUENCE IF EXISTS {project_schema}.{main_table_sequence};
+-- DROP TABLE    IF EXISTS {project_schema}.{main_table_name} CASCADE;
+-- DROP SEQUENCE IF EXISTS {project_schema}.{main_table_sequence};
 
 CREATE SEQUENCE IF NOT EXISTS {project_schema}.{main_table_sequence} INCREMENT 1 START 1;
 
@@ -95,12 +86,8 @@ sql_script += '''
 
 # Checking the lenght of primary key
 primary_key = 'pk_' + main_table_name[3:].replace("_", "")
+valid_name(primary_key)
 
-while True:
-    if len(primary_key) <= 30:
-        break
-    print(f"Sorry, the sequence ({primary_key}) must have a maximum of 30 characters. It has {len(primary_key)} characters.\n")
-    primary_key = input_info("Please enter a primary key (up to 30 characters): ")
 
 # Add the Constraint Primary Key to SQL Script
 sql_script += f'  CONSTRAINT {primary_key} PRIMARY KEY (co_seq_{main_table_name[3:]})'
@@ -133,7 +120,8 @@ if len(constraints) > 0:
         else:
             sql_script += f'  CONSTRAINT {constraint["name"]} {constraint["description"]},'
     sql_script += '\n);'
-
+else:
+    sql_script += '\n);'
 
 # Create the table comment to SQL Script
 sql_script += f"\n\n\nCOMMENT ON TABLE {project_schema}.{main_table_name} IS '{main_table_comment}';\n"
@@ -170,26 +158,21 @@ history_table_name = main_table_name.replace('tb', 'th') + '_hist'
 # Getting the sequence
 abbreviation = [letter[0] for letter in history_table_name[3:].split('_')]
 history_table_sequence = f'sq_{history_table_name[3:].replace("_", "")}_coseq' + ''.join(abbreviation)
+valid_name(history_table_sequence)
 
-# Cheking the lenght of history sequence
-while True:
-    if len(main_table_sequence) <= 30:
-        break
-    print(f"Sorry, the history sequence ({history_table_sequence}) must have a maximum of 30 characters. It has {len(history_table_sequence)} characters.\n")
-    history_table_sequence = input_info("Please enter a sequence (up to 30 characters): ")
 
 # Create de second part of the SQL Script
 sql_script += f'''
 ---------------------------------------
--- Tabela {history_table_name.upper()}
+-- TABELA {history_table_name.upper()}
 ---------------------------------------
----- DROP TABLE    IF EXISTS {project_schema}.{history_table_name} CASCADE;
----- DROP SEQUENCE IF EXISTS {project_schema}.{history_table_sequence};
+-- DROP TABLE    IF EXISTS {project_schema}.{history_table_name} CASCADE;
+-- DROP SEQUENCE IF EXISTS {project_schema}.{history_table_sequence};
 
 CREATE SEQUENCE IF NOT EXISTS {project_schema}.{history_table_sequence} INCREMENT 1 START 1;
 
 
-CREATE TABLE IF NOT EXISTS distribuicao.th_juizado_hist (
+CREATE TABLE IF NOT EXISTS {project_schema}.{history_table_name} (
   co_seq_{history_table_name[3:]}   BIGINT  NOT NULL DEFAULT nextval('{project_schema}.{history_table_sequence}'),
   co_seq_{main_table_name[3:]}  BIGINT  NOT NULL,
 '''
@@ -219,12 +202,8 @@ sql_script += '''
 
 # Checking the lenght of history primary key
 history_primary_key = 'pk_' + history_table_name[3:].replace("_", "")
+valid_name(history_primary_key)
 
-while True:
-    if len(history_primary_key) <= 30:
-        break
-    print(f"Sorry, the sequence ({history_primary_key}) must have a maximum of 30 characters. It has {len(history_primary_key)} characters.\n")
-    history_primary_key = input_info("Please enter a history primary key (up to 30 characters): ")
 
 # Add the Constraint Primary Key to SQL Script
 sql_script += f'  CONSTRAINT {history_primary_key} PRIMARY KEY (co_seq_{history_table_name[3:]}) \n'
@@ -261,8 +240,90 @@ COMMENT ON COLUMN {project_schema}.{history_table_name}.dh_inicio_hist          
 COMMENT ON COLUMN {project_schema}.{history_table_name}.dh_fim_hist                    IS 'Data que o registro foi inativado na tabela de historico, porque um novo registro foi incluido na Tabela. Indica que uma nova alteracao foi realizada na tabela origem.';
 '''
 
+sql_script += '\n'
+
+# Create trigger
+trigger_name = f'traiu_{main_table_name[3:].replace("_", "")}'
+valid_name(trigger_name)
+
+trigger_function_name = f'fc_log_{main_table_name[3:].replace("_", "")}'
+valid_name(trigger_function_name)
+
+
+sql_script += f'''
+-----------------------------------------------
+-- TRIGGER DA TABELA {main_table_name.upper()}
+-----------------------------------------------
+-- DROP FUNCTION IF EXISTS {trigger_function_name};
+-- DROP TRIGGER IF EXISTS {trigger_name} ON {main_table_name};
+
+CREATE OR REPLACE FUNCTION {trigger_function_name}()
+RETURNS trigger AS
+$BODY$
+	begin
+		INSERT INTO {project_schema}.{history_table_name}(
+										co_seq_{main_table_name[3:]},
+'''
+
+for column in columns:
+    sql_script += f'										{column["name"]},'
+
+
+sql_script += f'''
+										sg_projeto_modificador,
+                                        sg_acao_modificadora,
+                                        no_end_point_modificador,
+                                        st_ativo,
+                                        dh_criacao,
+                                        dh_alteracao,
+                                        tp_operacao,
+                                        nu_versao,
+                                        co_uuid,
+                                        co_uuid_1,
+                                        dh_inicio_hist)
+								values(
+										new.co_seq_{main_table_name[3:]}, 
+'''
+
+for column in columns:
+    sql_script += f'										new.{column["name"]},'
+
+sql_script += f'''
+										new.sg_projeto_modificador,
+                                        new.sg_acao_modificadora,
+                                        new.no_end_point_modificador,
+                                        new.st_ativo,
+                                        new.dh_criacao,
+                                        new.dh_alteracao,
+                                        new.tp_operacao,
+                                        new.nu_versao,
+                                        new.co_uuid,
+                                        new.co_uuid_1,
+                                        now());
+	RETURN NEW;
+	END;
+$BODY$
+LANGUAGE plpgsql;
+\n\n
+'''
+
+sql_script += f'''
+CREATE TRIGGER {trigger_name}
+AFTER INSERT OR UPDATE ON {project_schema}.{main_table_name} 
+FOR EACH ROW
+EXECUTE PROCEDURE {trigger_function_name}();
+\n\n
+'''
+
+
+
+
 # Create name of the SQL Script
 sql_script_name = f'V__CRIATE_TABELA_{main_table_name.upper()}.sql'
+
+
+
+
 
 # Create de file .sql
 with open(sql_script_name, 'w') as file:
